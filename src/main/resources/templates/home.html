@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <style>
+        body {
+            display: flex;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        .sidebar {
+            width: 200px;
+            background: #333;
+            color: white;
+            padding: 15px;
+            height: 100vh;
+        }
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #444;
+            color: white;
+            padding: 10px;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 194px;
+            box-sizing: border-box;
+        }
+        .content {
+            margin-left: 20px;
+            margin-top: 80px;
+            padding: 20px;
+            width: calc(100% - 200px);
+        }
+        .table-container {
+            margin-top: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #555;
+            color: white;
+        }
+        .btn {
+            padding: 5px 10px;
+            margin: 2px;
+            border: none;
+            cursor: pointer;
+            color: white;
+        }
+        .update-btn {
+            background-color: #4CAF50;
+        }
+        .delete-btn {
+            background-color: #f44336;
+        }
+        .add-btn {
+            background-color: #008CBA;
+            padding: 8px 15px;
+            text-align: center;
+            width: fit-content;
+            float: right;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>Admin Panel</h2>
+        <ul>
+            <li>Dashboard</li>
+            <li>Users</li>
+            <li>Settings</li>
+        </ul>
+    </div>
+    <div class="topbar">
+        <h2>Manage Data</h2>
+    </div>
+    <div class="content">
+        <button class="btn add-btn">Add</button>
+        <div class="table-container">
+            <table>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Actions</th>
+                    <th></th>
+                </tr>
+                <tr>
+                    <td>1</td>
+                    <td>John Doe</td>
+                    <td>john@example.com</td>
+                    <td>Admin</td>
+                    <td><div class="content">
+                        <h2>Manage Device Condition</h2>
+                    
+                        <!-- Dropdown to display statuses -->
+                        <label for="statusDropdown">Choose a Status:</label>
+                        <select id="device_condition">
+                            <option value="">Loading...</option>
+                        </select>
+                    </div>
+                    </td>
+                    <td>
+                        <button class="btn update-btn">Update</button>
+                        <button class="btn delete-btn">Delete</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>Jane Doe</td>
+                    <td>jane@example.com</td>
+                    <td>User</td>
+                    <td></td>
+                    <td>
+                        <button class="btn update-btn">Update</button>
+                        <button class="btn delete-btn">Delete</button>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
+
+<script>
+     document.getElementById("statusForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            
+            // Automatically get the table name from the dropdown ID
+            const tableId = document.querySelector("select").id;
+            const statusName = document.getElementById("statusName").value;
+
+            fetch(`http://localhost:8080/api/status/${tableId}/add`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ name: statusName })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert("Status Added: " + data.name);
+                document.getElementById("statusName").value = "";
+            })
+            .catch(error => console.error("Error:", error));
+        });
+    </script>

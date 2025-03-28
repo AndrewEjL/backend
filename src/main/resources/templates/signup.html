@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Signup Form</title>
+  <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/signup.js" defer></script>
+</head>
+<body class="login_background">
+  <section>
+    <form action="/signup" method="post">
+      <h1>Sign Up</h1>
+        <div class="inputbox">
+            <ion-icon name="person-outline"></ion-icon>
+            <input type="text" id= "admin_name" name="admin_name" required>
+            <label for="">Name</label>
+        </div>
+        <div class="inputbox">
+            <ion-icon name="mail-outline"></ion-icon>
+            <input type="email" id="email" name="email" required>
+            <label for="">Email</label>
+        </div>
+        <div class="inputbox">
+            <ion-icon name="call-outline"></ion-icon>
+            <input type="tel" id="phone_number" name="phone_number" required>
+            <label for="">Phone Number</label>
+        </div>
+        <div class="inputbox">
+            <ion-icon name="lock-closed-outline"></ion-icon>
+            <input type="password" id="password" name="password" required>
+            <label for="">Password</label>
+        </div>  
+        <div class="inputbox">
+          <ion-icon name="lock-closed-outline"></ion-icon>
+          <input type="password" id="passwordcon" name="passwordcon" required>
+          <label for="">Confirm Password</label>
+      </div>  
+        <button id= "submit" type="submit">Sign Up</button>
+      <div class="register">
+        <p>Already have an account? <a href="/login">Log In</a></p>
+      </div>
+    </form>
+  </section>
+</body>
+</html>
+ 
+<script>
+  const submitButttom = document.getElementById("submit");
+  submitButttom.addEventListener('click',()=>{
+    const admin_name = document.getElementById('admin_name').value;
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('passwordcon').value;
+    const email = document.getElementById('email').value;
+    const phone_number = document.getElementById('phone_number').value;
+    const data ={
+      admin_name,
+      email,
+      phone_number,
+      password
+    }
+    
+    if(password == confirmPassword){
+      const jsonData = JSON.stringify(data);
+      fetch('/signup', {
+        method: 'POST',
+        headers:{
+          'Content-Type': 'application/json'
+        },
+        body: jsonData
+      })
+      .then(response =>{
+        //alert('succesfull');
+        //if(response.status == 200){
+          //alert('succesfull');
+        //xs}
+      })
+    }
+    
+  })
+
+  
+</script>
