@@ -1,24 +1,21 @@
-package e_was.backend.Service.User;
+package e_was.backend;
 
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.*;
-
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.CriteriaBuilder;
 import jakarta.persistence.TypedQuery;
 
 import e_was.backend.Model.User.UserDonor;
 import e_was.backend.Respository.User.UserDonorRepository;
 import e_was.backend.Respository.User.UserRecipientRepository;
+import e_was.backend.Service.User.MyUserService;
 import e_was.backend.Service.email.MailService;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.mockito.*;
 
 public class MyUserServiceTest {
 
@@ -38,11 +35,18 @@ public class MyUserServiceTest {
     private UserRecipientRepository userRecipientRepo;
 
     @Mock
-    private UserTable userTable;
+    private CriteriaBuilder criteriaBuilder;
+
+    @Mock
+    private TypedQuery<UserDonor> typedQuery;
 
     @BeforeEach
     public void setup() {
         MockitoAnnotations.openMocks(this);
+        
+        // Mock EntityManager behavior
+        when(entityManager.getCriteriaBuilder()).thenReturn(criteriaBuilder);
+        when(entityManager.createQuery(any())).thenReturn(typedQuery);
     }
 
     @Test
