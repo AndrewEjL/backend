@@ -50,11 +50,11 @@
 		</dependency>
 
 		<!-- Spring Boot Test -->
-		<!-- <dependency>
+		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
-		</dependency> -->
+		</dependency>
 
 		<!-- Jakarta -->
 		<dependency>
@@ -135,6 +135,7 @@
 			<artifactId>h2</artifactId>
 			<scope>test</scope>
 		</dependency>
+
 	<!-- Add other dependencies as needed -->
 
  </dependencies>
