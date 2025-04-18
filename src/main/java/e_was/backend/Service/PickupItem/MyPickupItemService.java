@@ -33,7 +33,27 @@ public class MyPickupItemService {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<T> query = cb.createQuery(entityClass);
         Root<T> root = query.from(entityClass);
-        query.select(root).where(cb.equal(root.get("isDelete"), false));
+        query.select(root).where(
+            cb.and(
+                cb.equal(root.get("isDelete"), false),
+                cb.equal(root.get("itemStatusID"), 1)
+            )
+        );
+        return entityManager.createQuery(query).getResultList();
+    }
+
+    // Get All
+    public <T extends MyPickupItem> List<T> getAllWithoutID(String tableName){
+        Class<T> entityClass = (Class<T>) itemTable.getEntity(tableName);
+    
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<T> query = cb.createQuery(entityClass);
+        Root<T> root = query.from(entityClass);
+        query.select(root).where(
+            cb.and(
+                cb.equal(root.get("isDelete"), false)
+            )
+        );
         return entityManager.createQuery(query).getResultList();
     }
     
@@ -47,7 +67,7 @@ public class MyPickupItemService {
         query.select(root).where(
             cb.and(
                 cb.equal(root.get("userDonorID"), id),
-                cb.in(root.get("itemStatusID")).value(1).value(2),
+                cb.equal(root.get("itemStatusID"), 1),
                 cb.equal(root.get("isDelete"), false)
             )
         );
@@ -90,7 +110,7 @@ public class MyPickupItemService {
         return entityManager.createQuery(query).getResultList();
     }
 
-        // Get history multiple by item ID
+    // Get history multiple by item ID
     public <T extends MyPickupItem> List<T> getHistoryItem(int id, String tableName) {
         Class<T> entityClass = (Class<T>) itemTable.getEntity(tableName);
     
@@ -144,6 +164,27 @@ public class MyPickupItemService {
         ));
     return entityManager.createQuery(update).executeUpdate();
     }
+
+    //update status
+    public int updateStatus(MyPickupItem item, int id, String tableName){
+        Class<? extends MyPickupItem> entityClass = itemTable.getEntity(tableName);
+
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaUpdate<MyPickupItem> update = cb.createCriteriaUpdate(MyPickupItem.class);
+        Root<MyPickupItem> root = update.from(MyPickupItem.class);
+
+        update.set("itemStatusID", item.getItemStatusID());
+        update.set("isUpdate", true);
+        update.set("updateDate", new Timestamp(System.currentTimeMillis()));
+        
+        update.where(
+        cb.and(
+            cb.equal(root.get("pickupItemID"), id),
+            cb.equal(root.get("isDelete"), false)
+        ));
+    return entityManager.createQuery(update).executeUpdate();
+    }
+
 
     // Delete
     @Transactional

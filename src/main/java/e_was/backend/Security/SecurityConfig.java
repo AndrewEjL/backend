@@ -68,10 +68,13 @@ public class SecurityConfig {
                     // Permit all API endpoints
                     registry.requestMatchers(new AntPathRequestMatcher("/api/status/**")).permitAll();
                     registry.requestMatchers(new AntPathRequestMatcher("/api/organization/**")).permitAll();
+                    registry.requestMatchers(new AntPathRequestMatcher("/api/organizationStats/**")).permitAll();
                     registry.requestMatchers(new AntPathRequestMatcher("/api/user/**")).permitAll();
                     registry.requestMatchers(new AntPathRequestMatcher("/api/pickup/**")).permitAll();
                     registry.requestMatchers(new AntPathRequestMatcher("/api/item/**")).permitAll();
                     registry.requestMatchers(new AntPathRequestMatcher("/api/transaction/**")).permitAll();
+                    registry.requestMatchers(new AntPathRequestMatcher("/api/rewards/**")).permitAll();
+                    registry.requestMatchers(new AntPathRequestMatcher("/api/userRewards/**")).permitAll();
 
                     // Require authentication for all other requests
                     registry.anyRequest().authenticated();

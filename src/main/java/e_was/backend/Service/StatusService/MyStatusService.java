@@ -32,11 +32,25 @@ public class MyStatusService {
         return entityManager.createQuery(query).getResultList();
     }
 
-
     // Get by ID
     public MyStatus getByID(int id, String tableName) {
         Class<? extends MyStatus> entityClass = tableService.getEntity(tableName);
         return entityManager.find(entityClass, id);
+    }
+
+    // Get by cities
+    public <T extends MyStatus> List<T> getByCities(String tableName, int statesID){
+        Class<T> entityClass = (Class<T>) tableService.getEntity(tableName);
+
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<T> query = cb.createQuery(entityClass);
+        Root<T> root = query.from(entityClass);
+        query.select(root).where(
+            cb.and(
+                cb.equal(root.get("statesType"), statesID)
+            )
+        );
+        return entityManager.createQuery(query).getResultList();
     }
 
     // Add new data

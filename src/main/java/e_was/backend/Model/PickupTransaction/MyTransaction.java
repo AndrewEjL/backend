@@ -24,14 +24,14 @@ public class MyTransaction {
     @JsonProperty("pickup_item_id")
     private int pickupItemID;
 
-    @Column(name = "user_recipient_id")
-    @JsonProperty("user_recipient_id")
-    private int userRecipientID;
-
     @Column(name = "user_donor_id")
     @JsonProperty("user_donor_id")
     private int userDonorID;
 
+    @Column(name = "user_recipient_id")
+    @JsonProperty("user_recipient_id")
+    private int userRecipientID;
+    
     @Column(name = "organization_id")
     @JsonProperty("organization_id")
     private int organizationID;
@@ -39,6 +39,13 @@ public class MyTransaction {
     @Column(name = "pickup_status_id")
     @JsonProperty("pickup_status_id")
     private int pickupStatusID;
+
+    @Column(name = "weight")
+    @JsonProperty("weight")
+    private double weight;
+
+    @Column(name = "created_date")
+    private Timestamp createdDate;
 
     @Column(name = "is_delete", nullable = false)
     private Boolean isDelete = false;
@@ -130,6 +137,22 @@ public class MyTransaction {
 
     public void setOrganizationID(int organizationID) {
         this.organizationID = organizationID;
+    }
+
+    public Timestamp getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(Timestamp createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    public double getWeight() {
+        return weight;
+    }
+
+    public void setWeight(double weight) {
+        this.weight = weight;
     }
 
     

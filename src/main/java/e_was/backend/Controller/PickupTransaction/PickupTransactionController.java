@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.checkerframework.checker.units.qual.t;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import e_was.backend.Model.PickupItem.MyPickupItem;
 import e_was.backend.Model.PickupTransaction.MyTransaction;
 import e_was.backend.Service.PickupTransaction.MyTransactionService;
 
@@ -35,6 +33,11 @@ public class PickupTransactionController {
         return myTransactionService.getByID(id, orgID, tableName);
     }
 
+    @GetMapping("/{tableName}/collector/{id}")
+    public List<MyTransaction> getByColletorID(@PathVariable String tableName, @PathVariable int id) {
+        return myTransactionService.getByCollectorID(id, tableName);
+    }
+
     @GetMapping("/{tableName}/distinctOrg/{id}")
     public List<MyTransaction> getDistinctOrgIDs(@PathVariable String tableName, @PathVariable int id) {
         return myTransactionService.getDistinctOrgIDsByDonorID(id, tableName);
@@ -43,6 +46,26 @@ public class PickupTransactionController {
     @GetMapping("/{tableName}/history/{id}")
     public List<MyTransaction> getHistory(@PathVariable String tableName, @PathVariable int id) {
         return myTransactionService.getHistory(id, tableName);
+    }
+
+    @GetMapping("/{tableName}/collector/history/{id}")
+    public List<MyTransaction> getCollectorHistory(@PathVariable String tableName, @PathVariable int id) {
+        return myTransactionService.getCollectorHistory(id, tableName);
+    }
+    
+    @GetMapping("/{tableName}/org/{id}")
+    public List<MyTransaction> getByOrg(@PathVariable String tableName, @PathVariable int id) {
+        return myTransactionService.getByOrg(id, tableName);
+    }
+
+    @GetMapping("/{tableName}/org/history/{id}")
+    public List<MyTransaction> getOrgHistory(@PathVariable String tableName, @PathVariable int id) {
+        return myTransactionService.getOrgHistory(id, tableName);
+    }
+
+    @GetMapping("/{tableName}/orgHistory/{id}/{orgID}")
+    public List<MyTransaction> getByOrgHistory(@PathVariable String tableName, @PathVariable int id, @PathVariable int orgID) {
+        return myTransactionService.getByOrgHistory(id, orgID, tableName);
     }
 
     @PostMapping("/{tableName}/add")
@@ -67,6 +90,23 @@ public class PickupTransactionController {
         Map<String, Object> response = new HashMap<>();
         try {
             MyTransaction updatedTransaction = myTransactionService.update(transaction, id, tableName);
+    
+            response.put("success", true);
+            response.put("message", "Item updated successfully");
+            response.put("data", updatedTransaction);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Error updating item: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
+
+    @PutMapping("/{tableName}/update/status/{id}")
+    public ResponseEntity<Map<String, Object>> collectingItem(@RequestBody MyTransaction transaction, @PathVariable String tableName, @PathVariable int id) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            MyTransaction updatedTransaction = myTransactionService.updatePickupStatus(transaction, id, tableName);
     
             response.put("success", true);
             response.put("message", "Item updated successfully");

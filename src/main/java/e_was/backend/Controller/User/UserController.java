@@ -3,6 +3,7 @@ package e_was.backend.Controller.User;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,7 +18,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import e_was.backend.BackendApplication;
+import e_was.backend.DTO.ForgotPassRequest;
 import e_was.backend.DTO.LoginRequest;
+import e_was.backend.DTO.ResetPassRequest;
 import e_was.backend.Model.User.MyUser;
 import e_was.backend.Model.User.UserDonor;
 import e_was.backend.Model.User.UserRecipient;
@@ -46,6 +49,17 @@ public class UserController {
     @GetMapping("/{tableName}/{id}")
     public MyUser getByID(@PathVariable String tableName, @PathVariable int id) {
         return myUserService.getByID(id, tableName);
+    }
+
+    @PostMapping("/{tableName}/validatePass/{id}")
+    public Boolean validatePassword(@RequestBody Map<String, String> userData, @PathVariable String tableName, @PathVariable int id) {
+        String inputPass = userData.get("password");
+        return myUserService.validatePassword(id, tableName, inputPass);
+    }
+
+    @GetMapping("/{tableName}/org/{id}")
+    public List<? extends MyUser> getByOrgID(@PathVariable String tableName, @PathVariable int id) {
+        return myUserService.getByOrgID(id, tableName);
     }
 
     @PostMapping("/{tableName}/add")
@@ -115,10 +129,11 @@ public class UserController {
     }
 
     @PutMapping("/{tableName}/update/password/{id}")
-    public ResponseEntity<Map<String, Object>> updatePass( @RequestBody Map<String, Object> userData, @PathVariable String tableName, @PathVariable int id) {    
+    public ResponseEntity<Map<String, Object>> updatePass(@RequestBody Map<String, Object> userData, @PathVariable String tableName, @PathVariable int id) {    
         Map<String, Object> response = new HashMap<>();
         try {
             String newPassword = (String) userData.get("password");
+            String originPassword = (String) userData.get("originPassword");
             
             if (newPassword == null || newPassword.trim().isEmpty()) {
                 response.put("success", false);
@@ -126,10 +141,41 @@ public class UserController {
                 return ResponseEntity.badRequest().body(response);
             }
 
-            MyUser updatedUser = myUserService.updatePass(newPassword, id, tableName);
-            
+            if (originPassword== null || originPassword.trim().isEmpty()) {
+                response.put("success", false);
+                response.put("message", "Origin password cannot be empty");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            boolean isUpdated = myUserService.updatePass(originPassword, newPassword, id, tableName);
+            if (!isUpdated) {
+                response.put("success", false);
+                response.put("message", "Incorrect original password");
+                return ResponseEntity.badRequest().body(response);
+            }            
             response.put("success", true);
             response.put("message", "Password updated successfully");
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
+    
+    @PutMapping("/{tableName}/update/rewardsPoint/{id}")
+    public ResponseEntity<Map<String, Object>> updatePoint(@RequestBody UserDonor userData, @PathVariable String tableName, @PathVariable int id) {    
+        Map<String, Object> response = new HashMap<>();
+        try {           
+            if (!tableName.equals("user_donor")) {
+                response.put("success", false);
+                response.put("message", "Invalid table name for reward points");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            UserDonor isUpdated = myUserService.updatePoint(userData, id, tableName);           
+            response.put("success", true);
+            response.put("message", "Point updated successfully");
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             response.put("success", false);
@@ -143,6 +189,21 @@ public class UserController {
         Map<String, Object> response = new HashMap<>();
         try{
             myUserService.delete(id, tableName);
+            response.put("success", true);
+            response.put("message", "User deleted successfully");
+            return ResponseEntity.ok(response);
+        } catch (Exception e){ 
+            response.put("success", false);
+            response.put("message", "Error deleting user: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
+
+    @PutMapping("/{tableName}/restore/{id}")
+    public ResponseEntity<Map<String, Object>> restoreCollector(@PathVariable String tableName, @PathVariable int id) {
+        Map<String, Object> response = new HashMap<>();
+        try{
+            myUserService.restoreCollector(id, tableName);
             response.put("success", true);
             response.put("message", "User deleted successfully");
             return ResponseEntity.ok(response);
@@ -176,4 +237,31 @@ public class UserController {
         response.put("userType", userType);
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/sendCode")
+    public ResponseEntity<String> sendVerificationCode(@RequestBody ForgotPassRequest request) {
+        boolean sent = myUserService.sendForgotPasswordVerification(request.getEmail(), request.getCode());
+        if (sent) {
+            return ResponseEntity.ok("Code sent");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Email not found");
+        }
+    }
+
+    @PutMapping("/reset")
+    public ResponseEntity<String> resetPass(@RequestBody ResetPassRequest request) {
+        boolean reset = myUserService.resetPassword(request.getEmail(), request.getNewPass());
+        if (reset) {
+            return ResponseEntity.ok("Password reset complete");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("password reset failed not found");
+        }
+    }
+
+    @GetMapping("/generateCode")
+    public ResponseEntity<Map<String, String>> generateCode() {
+        String code = String.format("%06d", new Random().nextInt(999999));
+        return ResponseEntity.ok(Map.of("code", code));
+    }
+
 }

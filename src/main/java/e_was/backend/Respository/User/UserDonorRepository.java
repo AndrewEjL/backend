@@ -6,5 +6,6 @@ import e_was.backend.Model.User.UserDonor;
 
 @Repository
 public interface UserDonorRepository extends JpaRepository<UserDonor, Integer> {
+    UserDonor findByEmail(String email);
 }
 

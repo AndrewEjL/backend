@@ -23,6 +23,12 @@ public class StatusController {
         return myStatusService.getByID(id, tableName);
     }
 
+    @GetMapping("/{tableName}/getCities/{id}")
+    public List<? extends MyStatus> getByCities(@PathVariable String tableName, @PathVariable int id) {
+        return myStatusService.getByCities(tableName, id);
+    }
+
+
     @PostMapping("/{tableName}/add")
     public MyStatus addStatus(@RequestBody MyStatus status, @PathVariable String tableName) {
         return myStatusService.save(status, tableName);

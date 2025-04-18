@@ -6,5 +6,5 @@ import e_was.backend.Model.Organization.MyOrganization;
 
 @Repository
 public interface OrganizationRepository extends JpaRepository<MyOrganization, Integer> {
-
+    MyOrganization findByEmail(String email);
 }

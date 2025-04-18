@@ -33,6 +33,11 @@ public class PickupItemsController {
         return myPickupItemService.getAll(tableName);
     }
 
+    @GetMapping("/{tableName}/allWStatus")
+    public List<? extends MyPickupItem> getAllWithoutStatus(@PathVariable String tableName) {
+        return myPickupItemService.getAllWithoutID(tableName);
+    }
+
     @GetMapping("/{tableName}/{id}")
     public List<MyPickupItem> getByID(@PathVariable String tableName, @PathVariable int id) {
         return myPickupItemService.getByID(id, tableName);
@@ -78,6 +83,28 @@ public class PickupItemsController {
         Map<String, Object> response = new HashMap<>();
         try {
             int updatedItem = myPickupItemService.update(item, id, tableName, itemName);
+    
+            if (updatedItem > 0) {
+                response.put("success", true);
+                response.put("message", "Updated " + updatedItem + " items successfully.");
+            } else {
+                response.put("success", false);
+                response.put("message", "No items updated. Check if items exist or meet update conditions.");
+            }
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Error updating item: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
+
+        
+    @PutMapping("/{tableName}/update/status/{id}")
+    public ResponseEntity<Map<String, Object>> updateItemStatus(@RequestBody MyPickupItem item, @PathVariable int id, @PathVariable String tableName) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            int updatedItem = myPickupItemService.updateStatus(item, id, tableName);
     
             if (updatedItem > 0) {
                 response.put("success", true);

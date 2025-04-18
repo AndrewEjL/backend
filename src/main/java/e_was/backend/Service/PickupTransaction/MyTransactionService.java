@@ -47,6 +47,7 @@ public class MyTransactionService {
         query.select(root).where(
             cb.and(
                 cb.equal(root.get("userDonorID"), id),
+                cb.in(root.get("pickupStatusID")).value(1).value(2),
                 cb.equal(root.get("organizationID"), orgID),
                 cb.equal(root.get("isDelete"), false)
             )
@@ -54,7 +55,24 @@ public class MyTransactionService {
         return entityManager.createQuery(query).getResultList();
     }
 
-    // Get by org 
+    // Get by ID for collector
+    public <T extends MyTransaction> List<T> getByCollectorID(int id, String tableName) {
+        Class<T> entityClass = (Class<T>) transactionTable.getEntity(tableName);
+    
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<T> query = cb.createQuery(entityClass);
+        Root<T> root = query.from(entityClass);
+        query.select(root).where(
+            cb.and(
+                cb.equal(root.get("userRecipientID"), id),
+                cb.in(root.get("pickupStatusID")).value(1).value(2),
+                cb.equal(root.get("isDelete"), false)
+            )
+        );
+        return entityManager.createQuery(query).getResultList();
+    }
+
+    // Get by distinct org 
     public <T extends MyTransaction> List<T> getDistinctOrgIDsByDonorID(int id, String tableName) {
         Class<T> entityClass =(Class<T>) transactionTable.getEntity(tableName);
     
@@ -65,12 +83,13 @@ public class MyTransactionService {
         query.select(root)
              .where(cb.and(
                  cb.equal(root.get("userDonorID"), id),
+                 cb.in(root.get("pickupStatusID")).value(1).value(2),
                  cb.equal(root.get("isDelete"), false)
              )).groupBy(root.get("organizationID"));
         return entityManager.createQuery(query).getResultList();
     }
 
-    // Get by org 
+    // Get history by distinct org 
     public <T extends MyTransaction> List<T> getHistory(int id, String tableName) {
         Class<T> entityClass =(Class<T>) transactionTable.getEntity(tableName);
     
@@ -83,7 +102,76 @@ public class MyTransactionService {
                  cb.equal(root.get("userDonorID"), id),
                  cb.in(root.get("pickupStatusID")).value(3).value(4),
                  cb.equal(root.get("isDelete"), false)
-             )).groupBy(root.get("organizationID"));
+             ));
+        return entityManager.createQuery(query).getResultList();
+    }
+
+    // Get history by distinct org forCollector
+    public <T extends MyTransaction> List<T> getCollectorHistory(int id, String tableName) {
+        Class<T> entityClass =(Class<T>) transactionTable.getEntity(tableName);
+    
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<T> query = cb.createQuery(entityClass);
+        Root<T> root = query.from(entityClass);
+        
+        query.select(root)
+             .where(cb.and(
+                 cb.equal(root.get("userRecipientID"), id),
+                 cb.in(root.get("pickupStatusID")).value(3).value(4),
+                 cb.equal(root.get("isDelete"), false)
+             ));
+        return entityManager.createQuery(query).getResultList();
+    }
+
+    // Get for org 
+    public <T extends MyTransaction> List<T> getByOrg(int id, String tableName) {
+        Class<T> entityClass =(Class<T>) transactionTable.getEntity(tableName);
+        
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<T> query = cb.createQuery(entityClass);
+        Root<T> root = query.from(entityClass);
+            
+        query.select(root).where(
+            cb.and(
+                cb.equal(root.get("organizationID"), id),
+                cb.in(root.get("pickupStatusID")).value(1).value(2),
+                cb.equal(root.get("isDelete"), false)
+            ));
+        return entityManager.createQuery(query).getResultList();
+    }
+
+    // Get history for org 
+    public <T extends MyTransaction> List<T> getOrgHistory(int id, String tableName) {
+        Class<T> entityClass =(Class<T>) transactionTable.getEntity(tableName);
+            
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<T> query = cb.createQuery(entityClass);
+        Root<T> root = query.from(entityClass);
+                
+        query.select(root).where(
+            cb.and(
+                cb.equal(root.get("organizationID"), id),
+                cb.in(root.get("pickupStatusID")).value(3).value(4),
+                cb.equal(root.get("isDelete"), false)
+            ));
+        return entityManager.createQuery(query).getResultList();
+    }
+
+    // Get history for org 
+    public <T extends MyTransaction> List<T> getByOrgHistory(int id, int orgID, String tableName) {
+        Class<T> entityClass =(Class<T>) transactionTable.getEntity(tableName);
+            
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<T> query = cb.createQuery(entityClass);
+        Root<T> root = query.from(entityClass);
+                
+        query.select(root).where(
+            cb.and(
+                cb.equal(root.get("userDonorID"), id),
+                cb.equal(root.get("organizationID"), orgID),
+                cb.in(root.get("pickupStatusID")).value(3).value(4),
+                cb.equal(root.get("isDelete"), false)
+            ));
         return entityManager.createQuery(query).getResultList();
     }
 
@@ -91,8 +179,7 @@ public class MyTransactionService {
     public MyTransaction save(MyTransaction transaction, String tableName){    
         transaction.setPickupStatusID(1);
         entityManager.persist(transaction);
-        return transaction;
-        
+        return transaction;        
     }
 
     // update record
@@ -112,6 +199,26 @@ public class MyTransactionService {
             throw new RuntimeException("Pickup transaction not found");
         }
     }
+
+    // updateStatus
+    public MyTransaction updatePickupStatus(MyTransaction transaction, int id, String tableName){
+        Class<? extends MyTransaction> entityClass = transactionTable.getEntity(tableName);
+    
+        MyTransaction existTransaction = entityManager.find(entityClass, id);
+        if (existTransaction !=null) {
+            existTransaction.setPickupStatusID(transaction.getPickupStatusID());
+            if(transaction.getPickupStatusID() == 3){
+                existTransaction.setWeight(transaction.getWeight());
+            }
+            existTransaction.setIsUpdate(true);
+            existTransaction.setUpdateDate(new Timestamp(System.currentTimeMillis()));
+            entityManager.merge(existTransaction);
+            return existTransaction;
+        } else {
+            throw new RuntimeException("Pickup transaction not found");
+        }
+    }
+
 
     // Delete
     @Transactional
